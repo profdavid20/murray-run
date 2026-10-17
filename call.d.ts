@@ -13,8 +13,8 @@ export interface OneShotOptions<T> {
   models: ModelsConfig | string;
   system: string;
   prompt: string;
-  /** Checks the parsed reply (the structured output with `jsonSchema`, else the JSON found in the reply text). */
-  check: (raw: unknown) => CheckResult<T>;
+  /** Checks the parsed reply (the structured output with `jsonSchema`, else the JSON found in the reply text). May be async: a check that compiles or directs the reply (lesson-videos writes the film and runs its engine) is awaited before the retry. */
+  check: (raw: unknown) => CheckResult<T> | Promise<CheckResult<T>>;
   /** A JSON Schema the CLI enforces on the reply (`--json-schema`). Ignored by the API backend. */
   jsonSchema?: object;
   /** Local image files the model should look at (read with the Read tool on the CLI). */

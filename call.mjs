@@ -153,7 +153,7 @@ export async function oneShot(o) {
   const cacheFile = o.cache && !o.images?.length && !o.web ? join(o.cache.dir, o.stage, `${cacheKey(r.model, o)}.json`) : null;
   if (cacheFile && existsSync(cacheFile)) {
     try {
-      const c = o.check(JSON.parse(readFileSync(cacheFile, 'utf8')));
+      const c = await o.check(JSON.parse(readFileSync(cacheFile, 'utf8')));
       if (c.ok) {
         record({ stage: o.stage, model: r.model, ...zero, escalated: false, attempt: 0, ok: true, cached: true, seconds: 0 });
         return c.value;
@@ -186,7 +186,7 @@ export async function oneShot(o) {
     let ok = false;
     let value;
     try {
-      const c = o.check(res.structured ?? extractJson(res.text));
+      const c = await o.check(res.structured ?? extractJson(res.text));
       if (c.ok) {
         ok = true;
         value = c.value;

@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.1 — 2026-10-17
+
+- `call`: `check` may be async (`CheckResult | Promise<CheckResult>`); it is awaited before the retry, so a check
+  that writes the reply to disk and compiles or directs it (lesson-videos' film writer: the engine's `direct` and the
+  length gate inside the retry) can drive the "It was rejected" prompt. Sync checks are unchanged.
+
 ## v0.2.0 — 2026-10-17
 
 - `call`: the one model call (`oneShot`), lifted from Video Factory's `runStage` (lean headless Claude Code with thinking

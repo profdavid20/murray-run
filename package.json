@@ -1,6 +1,6 @@
 {
   "name": "@murray/run",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "The shared running layer for Video Factory and lesson-videos: the render lock, the model call, model routing and run records.",
   "license": "UNLICENSED",
   "private": true,

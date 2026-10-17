@@ -92,6 +92,17 @@ test('a retry is shown its rejected draft; after two failures it escalates; stru
   assert.deepEqual(recs.map((r) => [r.attempt, r.ok, r.escalated]), [[1, false, false], [2, false, false], [3, true, true]]);
 });
 
+test('an async check is awaited: its problems drive the retry', async () => {
+  const cli = fakeCli([{ text: '{"title":"Plants"}' }, { text: '{"title":"Plants Make Food"}' }]);
+  const slowCheck = async (raw) => {
+    await new Promise((r) => setTimeout(r, 5));
+    return titleCheck(raw);
+  };
+  const v = await oneShot({ stage: 'title', models: MODELS, system: 'S', prompt: 'P', check: slowCheck, cli: cli.bin, backend: 'claude-cli' });
+  assert.deepEqual(v, { title: 'Plants Make Food' });
+  assert.match(cli.calls()[1].input, /It was rejected:\n- title: must be three words/);
+});
+
 test('every attempt rejected: StageError', async () => {
   const cli = fakeCli([{ text: 'no' }, { text: 'no' }, { text: 'no' }]);
   await assert.rejects(oneShot({ stage: 'title', models: MODELS, system: 'S', prompt: 'P', check: titleCheck, cli: cli.bin, backend: 'claude-cli' }), StageError);
