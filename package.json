@@ -1,0 +1,26 @@
+{
+  "name": "@murray/run",
+  "version": "0.1.0",
+  "description": "The shared running layer for Video Factory and lesson-videos. v0.1.0: the machine-wide render lock.",
+  "license": "UNLICENSED",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "exports": {
+    "./lock": {
+      "types": "./lock.d.ts",
+      "import": "./lock.mjs"
+    }
+  },
+  "files": [
+    "lock.mjs",
+    "lock.d.ts",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "test": "node --test"
+  }
+}
