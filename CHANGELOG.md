@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.2.0 — 2026-10-17
+
+- `call`: the one model call (`oneShot`), lifted from Video Factory's `runStage` (lean headless Claude Code with thinking
+  off unless the tier sets an effort, retry that fixes the rejected draft, escalation, stage cache, API backend with web
+  tools) and lesson-videos' `oneShot` (async spawn so calls overlap, `pool`, `--json-schema`, kept sessions for transcript
+  metrics, `tools` for reviewers that read a packet). Same cache key as Video Factory's, so its old stage cache still hits.
+- `models`: reads each project's own `config/models.json` (tiers, escalation, prices stay in the project).
+- `usage`: the run record every attempt writes (tokens by kind, dollar cost, seconds, session) and usage-file totals.
+- Measured in Video Factory (`plan psalm-23-smoke`): $0.186 / 70 s before, $0.142 / 62 s after. A JSON schema rides on every
+  call, so pass it only when small: claim-check's reply fell 1,342 → 513 tokens with its 300-character schema, but the
+  56,000-character scenes schema made the plan cost $0.70.
+
 ## v0.1.0 — 2026-10-17
 
 - `lock`: the machine-wide render lock, lifted from Video Factory's `src/engine/render-lock.ts` (tested, first-come queue)

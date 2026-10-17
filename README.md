@@ -11,7 +11,7 @@ imports Remotion or either project's code. Plan: `video-factory/docs/SHARED-RUN-
 Pin a tag with the HTTPS tarball, as a normal dependency:
 
 ```bash
-npm install https://github.com/profdavid20/murray-run/archive/refs/tags/v0.1.0.tar.gz
+npm install https://github.com/profdavid20/murray-run/archive/refs/tags/v0.2.0.tar.gz
 ```
 
 Never the `github:profdavid20/murray-run#v0.1.0` shorthand: npm turns it into `git+ssh://`, which fails without SSH keys.
@@ -45,6 +45,42 @@ lockTurns({ project: 'lesson-videos' }); // every logged turn, oldest first
 ```
 
 `MURRAY_RENDER_LOCK` and `MURRAY_RENDER_LOCK_LOG` move the lock and the log (tests, a server).
+
+### `@murray/run/call` (v0.2.0)
+
+The one model call. A stage names its tier in **the project's own** `config/models.json` (model ids, efforts, escalation and
+prices stay in each project); the call runs headless Claude Code (lean: thinking off unless the tier sets an effort, no MCP,
+no hooks, no memory, no slash commands, no session file) or the API when `ANTHROPIC_API_KEY` is set, checks the reply,
+retries by showing the model its own rejected draft, escalates after `escalation.afterFailures` failures, and can answer from
+a stage cache. Async, so calls overlap; `pool(items, n, f)` caps how many at once. `jsonSchema` passes `--json-schema`, so the
+CLI hands back structured output instead of JSON hunted out of prose.
+
+```ts
+import { oneShot, pool, StageError } from '@murray/run/call';
+
+const scenes = await oneShot({
+  stage: 'script-write',              // in config/models.json `stages`
+  models: join(ROOT, 'config/models.json'),
+  system, prompt,
+  check: (raw) => { const p = Schema.safeParse(raw); return p.success ? { ok: true, value: p.data } : { ok: false, problems: [...] }; },
+  jsonSchema,                         // optional
+  tools: ['Read'], keepSession: true, // a reviewer that reads its packet and keeps its transcript
+  cache: { dir: join(OUT, '.cache/stages') },
+  record: (rec) => usage.add(rec),    // one run record per attempt
+});
+```
+
+`MURRAY_AI_BACKEND` forces `api` or `claude-cli`; `MURRAY_RUN_CLAUDE` names the `claude` binary.
+
+### `@murray/run/models` (v0.2.0)
+
+`loadModels(file)`, `route(cfg, stage)` (the attempts: tier model × `afterFailures`, then `escalateTo` at effort high),
+`priceOf(cfg, model, tokens)` (per-million prices from the project's file; 0 for an unpriced model).
+
+### `@murray/run/usage` (v0.2.0)
+
+`RunRecord` (stage, model, backend, tokens by kind, `costUsd`, attempt, escalated, ok, problems, seconds, session, id),
+`totals`, `byStage`, `appendUsage(file, rec)` (a `{totals, byStage, entries}` file) for projects without their own usage log.
 
 ## Develop
 
