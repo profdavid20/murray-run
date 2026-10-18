@@ -103,6 +103,16 @@ test('an async check is awaited: its problems drive the retry', async () => {
   assert.match(cli.calls()[1].input, /It was rejected:\n- title: must be three words/);
 });
 
+test('a third attempt is told what the second fixed, so it stays fixed', async () => {
+  const cli = fakeCli([{ text: '{"title":"Plants"}' }, { text: '{"title":"Plants Make Food Daily"}' }, { text: '{"title":"Plants Make Food"}' }]);
+  const check = (v) => (v.title.split(' ').length === 3 ? { ok: true, value: v } : { ok: false, problems: [v.title.split(' ').length < 3 ? 'title: must be three words' : 'title: too long'] });
+  const v = await oneShot({ stage: 'title', models: MODELS, system: 'S', prompt: 'P', check, cli: cli.bin, backend: 'claude-cli' });
+  assert.equal(v.title, 'Plants Make Food');
+  const calls = cli.calls();
+  assert.doesNotMatch(calls[1].input, /must stay fixed/);
+  assert.match(calls[2].input, /It was rejected:\n- title: too long\nFixed in an earlier attempt, and must stay fixed:\n- title: must be three words\n/);
+});
+
 test('every attempt rejected: StageError', async () => {
   const cli = fakeCli([{ text: 'no' }, { text: 'no' }, { text: 'no' }]);
   await assert.rejects(oneShot({ stage: 'title', models: MODELS, system: 'S', prompt: 'P', check: titleCheck, cli: cli.bin, backend: 'claude-cli' }), StageError);

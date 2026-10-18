@@ -164,12 +164,17 @@ export async function oneShot(o) {
   }
   let lastProblems = [];
   let lastReply = '';
+  const fixed = []; // problems of earlier attempts no longer reported: a later fix must not undo them
   for (let i = 0; i < r.attempts.length; i++) {
     const { model, effort, escalated } = r.attempts[i];
-    // A retry fixes the rejected draft rather than writing a new one, so what was right survives.
+    // A retry fixes the rejected draft rather than writing a new one, so what was right survives. It is also told what
+    // earlier retries fixed: a third attempt that cut words for length re-wrote the words the second had added for a
+    // cue, and failed on the first attempt's problems again (lesson-videos, Lesson 18 Reading 3).
+    const earlier = fixed.filter((p) => !lastProblems.includes(p));
     const prompt = lastProblems.length
-      ? `${o.prompt}\n\n${lastReply ? `Your previous reply:\n${lastReply}\n\n` : ''}It was rejected:\n- ${lastProblems.join('\n- ')}\n${lastReply ? 'Reply with the corrected version: change only what these problems need, keep everything else.' : 'Reply again, fixing these.'}`
+      ? `${o.prompt}\n\n${lastReply ? `Your previous reply:\n${lastReply}\n\n` : ''}It was rejected:\n- ${lastProblems.join('\n- ')}\n${earlier.length ? `Fixed in an earlier attempt, and must stay fixed:\n- ${earlier.join('\n- ')}\n` : ''}${lastReply ? 'Reply with the corrected version: change only what these problems need, keep everything else.' : 'Reply again, fixing these.'}`
       : o.prompt;
+    for (const p of lastProblems) if (!fixed.includes(p)) fixed.push(p);
     const started = Date.now();
     const seconds = () => +((Date.now() - started) / 1000).toFixed(1);
     let res;

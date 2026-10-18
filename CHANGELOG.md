@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.2 — 2026-10-17
+
+- `call`: a retry is also told the problems of earlier attempts that are no longer reported ("Fixed in an earlier
+  attempt, and must stay fixed"), so a fix for the newest problem doesn't undo an earlier one (a third attempt cutting
+  words for length re-wrote the cue words the second had added: lesson-videos, Lesson 18 Reading 3).
+
 ## v0.2.1 — 2026-10-17
 
 - `call`: `check` may be async (`CheckResult | Promise<CheckResult>`); it is awaited before the retry, so a check
